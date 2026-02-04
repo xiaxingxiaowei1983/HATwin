@@ -255,7 +255,7 @@
                     this.state = "DIAGNOSTIC_WAITING";
                     
                     // 调用阿里API获取欢迎消息
-                    const prompt = "你是LAY，一个毒舌、专业的酒店投资风控参谋。请用中文欢迎用户Jason，介绍你的身份和功能，强调你能帮助用户避免投资陷阱。";
+                    const prompt = "你是LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋。请用中文欢迎用户Jason，介绍你的身份和功能，强调你能通过直指商业底层本质来帮助用户避免投资陷阱，挽救用户的钱包。";
                     const apiResponse = await callAliAPI(prompt);
                     
                     let content = "正在获取AI响应...";
@@ -285,7 +285,7 @@
                     const input = userInput.toUpperCase();
                     if (!["A", "B", "C"].includes(input)) {
                         // 调用阿里API获取提示消息
-                        const prompt = "你是LAY，一个毒舌、专业的酒店投资风控参谋。用户输入了无效选项，不是A、B、C中的一个。请用中文提示用户必须选择A、B或C，并强调这很重要。";
+                        const prompt = "你是LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋。用户输入了无效选项，不是A、B、C中的一个。请用中文提示用户必须选择A、B或C，并强调这很重要，因为跳过或随意填写会直接导致风控诊断失效，浪费时间和资金。";
                         const apiResponse = await callAliAPI(prompt);
                         
                         let content = "请输入 A, B 或 C 进行选择。";
@@ -311,7 +311,7 @@
                     }
                     
                     // 调用阿里API获取测试反馈
-                    const prompt = `用户在智商税测试中选择了${input}。请作为LAY，一个毒舌、专业的酒店投资风控参谋，给出测试反馈，然后引导用户提供具体的投资意向（城市、预算、酒店类型）。`;
+                    const prompt = `用户在智商税测试中选择了${input}。请作为LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋，给出测试反馈，直指商业底层本质，然后引导用户提供具体的投资意向（城市、预算、酒店类型）。`;
                     const apiResponse = await callAliAPI(prompt);
                     
                     let response = "";
@@ -350,7 +350,7 @@
                     this.state = "GENERATING";
                     
                     // 调用阿里API获取城市分析
-                    const prompt = `用户想在${userInput}投资酒店。请作为LAY，一个毒舌、专业的酒店投资风控参谋，分析该城市的酒店市场，提供专业的投资建议，强调风险控制。`;
+                    const prompt = `用户想在${userInput}投资酒店。请作为LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋，分析该城市的酒店市场，直指商业底层本质，提供专业的投资建议，强调风险控制，挽救用户的钱包。`;
                     const apiResponse = await callAliAPI(prompt);
                     
                     let analysisContent = "正在分析城市数据...";
@@ -378,7 +378,7 @@
                 // 4. PAUSED -> RESUMED (断点续写)
                 else if (currentState === "GENERATING") {
                     // 调用阿里API获取财务测算
-                    const prompt = "用户要求继续查看财务测算表。请作为LAY，一个毒舌、专业的酒店投资风控参谋，提供详细的财务测算和风险分析，强调投资风险和风控措施。";
+                    const prompt = "用户要求继续查看财务测算表。请作为LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋，提供详细的财务测算和风险分析，直指商业底层本质，强调投资风险和风控措施，挽救用户的钱包。";
                     const apiResponse = await callAliAPI(prompt);
                     
                     let content = "正在生成财务测算分析...";
@@ -404,7 +404,7 @@
                 }
                 
                 // 调用阿里API获取系统异常消息
-                const prompt = "你是LAY，一个毒舌、专业的酒店投资风控参谋。系统遇到异常情况。请用中文提示用户系统出现异常，并建议刷新页面重试，保持你的专业和毒舌风格。";
+                const prompt = "你是LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋。系统遇到异常情况。请用中文提示用户系统出现异常，并建议刷新页面重试，保持你的专业、冷静的风格。";
                 const apiResponse = await callAliAPI(prompt);
                 
                 let content = "系统异常，请刷新。";
@@ -575,7 +575,7 @@
                 console.error('获取响应失败:', error);
                 removeLoading();
                 // 调用阿里API获取错误提示消息
-                const prompt = "你是LAY，一个毒舌、专业的酒店投资风控参谋。系统API调用失败，请用中文提示用户稍后重试，并保持你的专业和毒舌风格。";
+                const prompt = "你是LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋。系统API调用失败，请用中文提示用户稍后重试，并保持你的专业、冷静的风格。";
                 callAliAPI(prompt).then(apiResponse => {
                     let content = "API调用失败，请稍后重试。";
                     
