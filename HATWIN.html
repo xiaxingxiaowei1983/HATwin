@@ -284,6 +284,16 @@
                 else if (currentState === "DIAGNOSTIC_WAITING") {
                     const input = userInput.toUpperCase();
                     if (!["A", "B", "C"].includes(input)) {
+                        // 调用阿里API获取提示消息
+                        const prompt = "你是LAY，一个毒舌、专业的酒店投资风控参谋。用户输入了无效选项，不是A、B、C中的一个。请用中文提示用户必须选择A、B或C，并强调这很重要。";
+                        const apiResponse = await callAliAPI(prompt);
+                        
+                        let content = "请输入 A, B 或 C 进行选择。";
+                        
+                        if (apiResponse && apiResponse.output) {
+                            content = apiResponse.output.text || content;
+                        }
+                        
                         return `
                             <div class="flex items-start space-x-4">
                                 <div class="flex-shrink-0">
@@ -293,7 +303,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="bg-white rounded-xl p-5 shadow-soft">
-                                        <p class="text-gray-700">请输入 A, B 或 C 进行选择。</p>
+                                        <p class="text-gray-700">${content}</p>
                                     </div>
                                 </div>
                             </div>
@@ -305,18 +315,15 @@
                     const apiResponse = await callAliAPI(prompt);
                     
                     let response = "";
-                    if (input === "B") {
-                        response = "<p class='text-gray-700'><strong>勉强及格。</strong> 但你知道流水可以造假吗？你知道OTA差评可以被\"技术处理\"吗？不过你至少没那么天真。</p>";
-                    } else {
-                        response = "<p class='text-gray-700'><strong>典型韭菜。</strong> 选A的是给房东接盘装修垃圾的；选C的是患了'自信幻觉症'的。记住：好店不需要转让，转让的都是坑。</p>";
-                    }
                     
                     if (apiResponse && apiResponse.output) {
                         response = `<p class='text-gray-700'>${apiResponse.output.text}</p>`;
+                    } else {
+                        // API调用失败时的默认消息
+                        response = "<p class='text-gray-700'>测试反馈获取失败，请稍后重试。</p>";
                     }
                     
                     this.state = "ANALYSIS";
-                    response += "<p class='mt-3 text-gray-700'>测试结束。现在告诉我，<strong>你想在哪个城市，投资多少钱，做什么类型的酒店？</strong> (例如：我想在长沙开一家以电竞为主题的酒店，预算200万)</p>";
                     
                     return `
                         <div class="flex items-start space-x-4">
@@ -346,7 +353,7 @@
                     const prompt = `用户想在${userInput}投资酒店。请作为LAY，一个毒舌、专业的酒店投资风控参谋，分析该城市的酒店市场，提供专业的投资建议，强调风险控制。`;
                     const apiResponse = await callAliAPI(prompt);
                     
-                    let analysisContent = `收到。识别城市：<strong class="text-primary">${city}</strong>，判定等级：<strong class="text-primary">${tier}</strong> -> 调用 ${templateType}。正在根据"智商税破壁模型"检索 ${city} 的竞品数据...正在调用"系统性废弃"模型优化成本结构...`;
+                    let analysisContent = "正在分析城市数据...";
                     
                     if (apiResponse && apiResponse.output) {
                         analysisContent = apiResponse.output.text || analysisContent;
@@ -374,7 +381,7 @@
                     const prompt = "用户要求继续查看财务测算表。请作为LAY，一个毒舌、专业的酒店投资风控参谋，提供详细的财务测算和风险分析，强调投资风险和风控措施。";
                     const apiResponse = await callAliAPI(prompt);
                     
-                    let content = "P4. 财务测算 (FMEA风控版)。【风险对冲分析】你的回本周期模型建立在入住率 85% 的假设上。如果不幸遇到不可抗力（参考2020年），入住率跌至 40%，你的现金流能撑几个月？";
+                    let content = "正在生成财务测算分析...";
                     
                     if (apiResponse && apiResponse.output) {
                         content = apiResponse.output.text || content;
@@ -396,6 +403,16 @@
                     `;
                 }
                 
+                // 调用阿里API获取系统异常消息
+                const prompt = "你是LAY，一个毒舌、专业的酒店投资风控参谋。系统遇到异常情况。请用中文提示用户系统出现异常，并建议刷新页面重试，保持你的专业和毒舌风格。";
+                const apiResponse = await callAliAPI(prompt);
+                
+                let content = "系统异常，请刷新。";
+                
+                if (apiResponse && apiResponse.output) {
+                    content = apiResponse.output.text || content;
+                }
+                
                 return `
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
@@ -405,7 +422,7 @@
                         </div>
                         <div class="flex-1">
                             <div class="bg-white rounded-xl p-5 shadow-soft">
-                                <p class="text-gray-700">系统异常，请刷新。</p>
+                                <p class="text-gray-700">${content}</p>
                             </div>
                         </div>
                     </div>
@@ -465,13 +482,13 @@
             const loadingMessage = `
                 <div id="loading-message" class="flex items-start space-x-4">
                     <div class="flex-shrink-0">
-                        <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                            <i class="fa fa-diamond text-white"></i>
+                        <div class="w-10 h-10 rounded-lg overflow-hidden">
+                            <img src="LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                         </div>
                     </div>
                     <div class="flex-1">
                         <div class="bg-white rounded-xl p-5 shadow-soft">
-                            <p class="text-gray-500">(HotelVest 正在分析市场数据和投资模型...)</p>
+                            <p class="text-gray-500">(正在分析...)</p>
                         </div>
                     </div>
                 </div>
@@ -557,21 +574,48 @@
             } catch (error) {
                 console.error('获取响应失败:', error);
                 removeLoading();
-                const errorMessage = `
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                <img src="LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                // 调用阿里API获取错误提示消息
+                const prompt = "你是LAY，一个毒舌、专业的酒店投资风控参谋。系统API调用失败，请用中文提示用户稍后重试，并保持你的专业和毒舌风格。";
+                callAliAPI(prompt).then(apiResponse => {
+                    let content = "API调用失败，请稍后重试。";
+                    
+                    if (apiResponse && apiResponse.output) {
+                        content = apiResponse.output.text || content;
+                    }
+                    
+                    const errorMessage = `
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 rounded-lg overflow-hidden">
+                                    <img src="LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="bg-white rounded-xl p-5 shadow-soft">
+                                    <p class="text-gray-700">${content}</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex-1">
-                            <div class="bg-white rounded-xl p-5 shadow-soft">
-                                <p class="text-gray-700">API调用失败，请稍后重试。</p>
+                    `;
+                    addMessageToUI('assistant', errorMessage);
+                }).catch(() => {
+                    // 如果API调用也失败，显示最简单的错误提示
+                    const errorMessage = `
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 rounded-lg overflow-hidden">
+                                    <img src="LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="bg-white rounded-xl p-5 shadow-soft">
+                                    <p class="text-gray-700">系统异常，请稍后重试。</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                addMessageToUI('assistant', errorMessage);
+                    `;
+                    addMessageToUI('assistant', errorMessage);
+                });
             }
         });
 
