@@ -460,8 +460,23 @@
         // 初始化欢迎消息
         async function initWelcomeMessage() {
             try {
-                const welcomeMessage = await backend.getResponse("");
+                // 添加固定的第一句互动消息
+                const welcomeMessage = `
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-lg overflow-hidden">
+                                <img src="/lay.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white rounded-xl p-5 shadow-soft">
+                                <p class="text-gray-700">来了？ 酒店行业进入下半场，我们只谈生存和盈利逻辑。 唯有在不确定中寻找确定性，我带你一起穿越周期。</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 addMessageToUI('assistant', welcomeMessage);
+                backend.addMessage('assistant', welcomeMessage);
             } catch (error) {
                 console.error('初始化消息失败:', error);
                 const defaultMessage = `
