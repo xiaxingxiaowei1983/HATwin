@@ -164,7 +164,7 @@
         // 调用本地代理服务器API
         async function callAliAPI(prompt) {
             try {
-                const response = await fetch('http://localhost:3000/api/chat', {
+                const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
