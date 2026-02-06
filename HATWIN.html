@@ -158,71 +158,19 @@
         </main>
     </div>
 
-    <!-- API Key设置模态框 -->
-    <div id="api-key-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">设置API Key</h3>
-                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
-                    <i class="fa fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">DashScope API Key</label>
-                    <input 
-                        type="text" 
-                        id="api-key-input" 
-                        placeholder="sk-xxxxxxxx" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    >
-                </div>
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                    <p class="text-sm text-gray-700">
-                        <strong>安全提示：</strong> API Key将存储在您的本地浏览器中，仅用于本地测试。请勿在公共网络或共享设备上使用此功能。
-                    </p>
-                </div>
-                <div class="flex space-x-3">
-                    <button id="save-api-key" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-                        保存
-                    </button>
-                    <button id="cancel-api-key" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        取消
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <script>
-        // 阿里DashScope API配置
-        const ALI_API_CONFIG = {
-            appId: '54ba0b8489d64e458a9e405a95bf047a',
-            apiUrl: 'https://dashscope.aliyuncs.com/api/v1/apps/54ba0b8489d64e458a9e405a95bf047a/completion',
-            apiKey: localStorage.getItem('ALI_API_KEY') || window.ALI_API_KEY || '' // 优先从localStorage读取API Key
-        };
-
-        // 调用阿里DashScope API
+        // 调用本地代理服务器API
         async function callAliAPI(prompt) {
             try {
-                // 检查API Key是否设置
-                if (!ALI_API_CONFIG.apiKey) {
-                    console.error('API Key未设置，请在浏览器控制台运行: window.ALI_API_KEY = "your_api_key"');
-                    return null;
-                }
-                
-                const response = await fetch(ALI_API_CONFIG.apiUrl, {
+                const response = await fetch('http://localhost:3000/api/chat', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${ALI_API_CONFIG.apiKey}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        input: {
-                            prompt: prompt
-                        },
-                        parameters: {},
-                        debug: {}
+                        prompt: prompt
                     })
                 });
                 
@@ -232,7 +180,11 @@
                 }
                 
                 const data = await response.json();
-                return data;
+                return {
+                    output: {
+                        text: data.text
+                    }
+                };
             } catch (error) {
                 console.error('API调用失败:', error);
                 return null;
@@ -288,7 +240,7 @@
                         const prompt = "你是LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋。用户输入了无效选项，不是A、B、C中的一个。请用中文提示用户必须选择A、B或C，并强调这很重要，因为跳过或随意填写会直接导致风控诊断失效，浪费时间和资金。";
                         const apiResponse = await callAliAPI(prompt);
                         
-                        let content = "请输入 A, B 或 C 进行选择。";
+                        let content = "正在获取AI响应...";
                         
                         if (apiResponse && apiResponse.output) {
                             content = apiResponse.output.text || content;
@@ -381,7 +333,7 @@
                     const prompt = "用户要求继续查看财务测算表。请作为LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋，提供详细的财务测算和风险分析，直指商业底层本质，强调投资风险和风控措施，挽救用户的钱包。";
                     const apiResponse = await callAliAPI(prompt);
                     
-                    let content = "正在生成财务测算分析...";
+                    let content = "正在获取AI响应...";
                     
                     if (apiResponse && apiResponse.output) {
                         content = apiResponse.output.text || content;
@@ -407,7 +359,7 @@
                 const prompt = "你是LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋。系统遇到异常情况。请用中文提示用户系统出现异常，并建议刷新页面重试，保持你的专业、冷静的风格。";
                 const apiResponse = await callAliAPI(prompt);
                 
-                let content = "系统异常，请刷新。";
+                let content = "正在获取AI响应...";
                 
                 if (apiResponse && apiResponse.output) {
                     content = apiResponse.output.text || content;
@@ -507,27 +459,6 @@
 
         // 初始化欢迎消息
         async function initWelcomeMessage() {
-            // 检查API Key是否设置
-            if (!ALI_API_CONFIG.apiKey) {
-                // API Key未设置，显示默认消息
-                const defaultMessage = `
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                <img src="LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-white rounded-xl p-5 shadow-soft">
-                                <p class="text-gray-700">请先设置API Key以获取AI响应。</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                addMessageToUI('assistant', defaultMessage);
-                return;
-            }
-
             try {
                 const welcomeMessage = await backend.getResponse("");
                 addMessageToUI('assistant', welcomeMessage);
@@ -542,7 +473,7 @@
                         </div>
                         <div class="flex-1">
                             <div class="bg-white rounded-xl p-5 shadow-soft">
-                                <p class="text-gray-700">API调用失败，请检查API Key是否正确。</p>
+                                <p class="text-gray-700">系统初始化失败，请稍后重试。</p>
                             </div>
                         </div>
                     </div>
@@ -577,7 +508,7 @@
                 // 调用阿里API获取错误提示消息
                 const prompt = "你是LAY，一个理性、专业、冷静、一针见血的酒店投资风控参谋。系统API调用失败，请用中文提示用户稍后重试，并保持你的专业、冷静的风格。";
                 callAliAPI(prompt).then(apiResponse => {
-                    let content = "API调用失败，请稍后重试。";
+                    let content = "正在获取AI响应...";
                     
                     if (apiResponse && apiResponse.output) {
                         content = apiResponse.output.text || content;
@@ -619,74 +550,10 @@
             }
         });
 
-        // API Key设置功能
-        function setupApiKeyManagement() {
-            const modal = document.getElementById('api-key-modal');
-            const apiKeyInput = document.getElementById('api-key-input');
-            const saveButton = document.getElementById('save-api-key');
-            const cancelButton = document.getElementById('cancel-api-key');
-            const closeButton = document.getElementById('close-modal');
 
-            // 显示模态框
-            function showModal() {
-                modal.classList.remove('hidden');
-            }
-
-            // 隐藏模态框
-            function hideModal() {
-                modal.classList.add('hidden');
-            }
-
-            // 保存API Key
-            function saveApiKey() {
-                const apiKey = apiKeyInput.value.trim();
-                if (apiKey) {
-                    localStorage.setItem('ALI_API_KEY', apiKey);
-                    ALI_API_CONFIG.apiKey = apiKey;
-                    hideModal();
-                    // 刷新页面以应用新的API Key
-                    location.reload();
-                } else {
-                    alert('请输入有效的API Key');
-                }
-            }
-
-            // 事件监听器
-            saveButton.addEventListener('click', saveApiKey);
-            cancelButton.addEventListener('click', hideModal);
-            closeButton.addEventListener('click', hideModal);
-
-            // 点击模态框外部关闭
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    hideModal();
-                }
-            });
-
-            // 检查API Key是否设置
-            if (!ALI_API_CONFIG.apiKey) {
-                showModal();
-            }
-
-            // 添加设置按钮到界面
-            const header = document.querySelector('header');
-            if (header) {
-                const settingsButton = document.createElement('button');
-                settingsButton.innerHTML = '<i class="fa fa-cog"></i>';
-                settingsButton.className = 'px-3 py-2 bg-secondary rounded-lg hover:bg-gray-700 transition-colors text-white';
-                settingsButton.title = '设置API Key';
-                settingsButton.addEventListener('click', showModal);
-                
-                const headerRight = header.querySelector('.flex.items-center.space-x-3');
-                if (headerRight) {
-                    headerRight.appendChild(settingsButton);
-                }
-            }
-        }
 
         // 初始化应用
         document.addEventListener('DOMContentLoaded', function() {
-            setupApiKeyManagement();
             initWelcomeMessage();
         });
     </script>

@@ -21,5 +21,9 @@ logs/
 build/
 dist/
 
+# Node.js files
+node_modules/
+package-lock.json
+
 .vercel
 .env*.local
