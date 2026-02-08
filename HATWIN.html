@@ -4,40 +4,581 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HotelVest - 智能投资顾问</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#1a365d',
-                        secondary: '#f8f5f0',
-                        accent: '#e6a23c',
-                        neutral: '#f5f5f5',
-                        'neutral-dark': '#333333',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                },
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- html2pdf 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- 本地回退样式 -->
+    <style>
+        /* 基本样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333333;
+        }
+        
+        /* 颜色变量 */
+        :root {
+            --primary: #1a365d;
+            --secondary: #f8f5f0;
+            --accent: #e6a23c;
+            --neutral: #f5f5f5;
+            --neutral-dark: #333333;
+        }
+        
+        /* 布局样式 */
+        .flex {
+            display: flex;
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .min-h-screen {
+            min-height: 100vh;
+        }
+        
+        .flex-1 {
+            flex: 1;
+        }
+        
+        .overflow-y-auto {
+            overflow-y: auto;
+        }
+        
+        .space-x-2 > * {
+            margin-right: 0.5rem;
+        }
+        
+        .space-x-3 > * {
+            margin-right: 0.75rem;
+        }
+        
+        .space-y-2 > * {
+            margin-bottom: 0.5rem;
+        }
+        
+        .space-y-3 > * {
+            margin-bottom: 0.75rem;
+        }
+        
+        .space-y-4 > * {
+            margin-bottom: 1rem;
+        }
+        
+        .space-y-6 > * {
+            margin-bottom: 1.5rem;
+        }
+        
+        .space-y-8 > * {
+            margin-bottom: 2rem;
+        }
+        
+        /* 间距样式 */
+        .p-2 {
+            padding: 0.5rem;
+        }
+        
+        .p-3 {
+            padding: 0.75rem;
+        }
+        
+        .p-4 {
+            padding: 1rem;
+        }
+        
+        .p-5 {
+            padding: 1.25rem;
+        }
+        
+        .p-6 {
+            padding: 1.5rem;
+        }
+        
+        .p-8 {
+            padding: 2rem;
+        }
+        
+        .px-2 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        
+        .px-3 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+        
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        .py-5 {
+            padding-top: 1.25rem;
+            padding-bottom: 1.25rem;
+        }
+        
+        .m-2 {
+            margin: 0.5rem;
+        }
+        
+        .m-4 {
+            margin: 1rem;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .mt-3 {
+            margin-top: 0.75rem;
+        }
+        
+        .mt-4 {
+            margin-top: 1rem;
+        }
+        
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+        
+        /* 边框样式 */
+        .border {
+            border: 1px solid #e5e7eb;
+        }
+        
+        .border-r {
+            border-right: 1px solid #e5e7eb;
+        }
+        
+        .border-l {
+            border-left: 1px solid #e5e7eb;
+        }
+        
+        .border-t {
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .border-b {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .border-gray-200 {
+            border-color: #e5e7eb;
+        }
+        
+        .border-gray-300 {
+            border-color: #d1d5db;
+        }
+        
+        /* 圆角样式 */
+        .rounded {
+            border-radius: 0.25rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .rounded-xl {
+            border-radius: 0.75rem;
+        }
+        
+        .rounded-full {
+            border-radius: 9999px;
+        }
+        
+        /* 背景样式 */
+        .bg-white {
+            background-color: #ffffff;
+        }
+        
+        .bg-primary {
+            background-color: #1a365d;
+        }
+        
+        .bg-secondary {
+            background-color: #f8f5f0;
+        }
+        
+        .bg-neutral {
+            background-color: #f5f5f5;
+        }
+        
+        .bg-pattern {
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* 文本样式 */
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .font-medium {
+            font-weight: 500;
+        }
+        
+        .font-semibold {
+            font-weight: 600;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-gray-400 {
+            color: #9ca3af;
+        }
+        
+        .text-gray-500 {
+            color: #6b7280;
+        }
+        
+        .text-gray-600 {
+            color: #4b5563;
+        }
+        
+        .text-gray-700 {
+            color: #374151;
+        }
+        
+        .text-white {
+            color: #ffffff;
+        }
+        
+        .text-primary {
+            color: #1a365d;
+        }
+        
+        .uppercase {
+            text-transform: uppercase;
+        }
+        
+        .tracking-wider {
+            letter-spacing: 0.05em;
+        }
+        
+        /* 阴影样式 */
+        .shadow-soft {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* 按钮样式 */
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        
+        .hover\:bg-gray-100:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .hover\:bg-gray-50:hover {
+            background-color: #f9fafb;
+        }
+        
+        .hover\:bg-primary\/90:hover {
+            background-color: rgba(26, 54, 93, 0.9);
+        }
+        
+        .hover\:bg-blue-700:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .hover\:bg-green-700:hover {
+            background-color: #15803d;
+        }
+        
+        .hover\:bg-purple-700:hover {
+            background-color: #7e22ce;
+        }
+        
+        .hover\:text-gray-600:hover {
+            color: #4b5563;
+        }
+        
+        /* 过渡效果 */
+        .transition-colors {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        
+        /* 定位样式 */
+        .fixed {
+            position: fixed;
+        }
+        
+        .top-4 {
+            top: 1rem;
+        }
+        
+        .right-4 {
+            right: 1rem;
+        }
+        
+        .bottom-10 {
+            bottom: 2.5rem;
+        }
+        
+        .left-1\/2 {
+            left: 50%;
+        }
+        
+        .transform {
+            transform: translate(-50%, -50%);
+        }
+        
+        .-translate-x-1\/2 {
+            transform: translateX(-50%);
+        }
+        
+        .-translate-y-1\/2 {
+            transform: translateY(-50%);
+        }
+        
+        /* 层级样式 */
+        .z-50 {
+            z-index: 50;
+        }
+        
+        /* 文本输入样式 */
+        input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        input:focus {
+            outline: none;
+            ring: 2px solid #1a365d;
+            border-color: transparent;
+        }
+        
+        /* 图片样式 */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* 图标样式 */
+        .fa {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            font-family: FontAwesome;
+            font-style: normal;
+            font-weight: normal;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* 响应式样式 */
+        .max-w-3xl {
+            max-width: 48rem;
+        }
+        
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 隐藏样式 */
+        .hidden {
+            display: none;
+        }
+        
+        /* 自定义工具类 */
+        .content-auto {
+            content-visibility: auto;
+        }
+        
+        .self-center {
+            align-self: center;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .items-start {
+            align-items: flex-start;
+        }
+        
+        .justify-center {
+            justify-content: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .justify-end {
+            justify-content: flex-end;
+        }
+        
+        .flex-shrink-0 {
+            flex-shrink: 0;
+        }
+        
+        /* 字体大小 */
+        .text-base {
+            font-size: 1rem;
+        }
+        
+        /* 动画效果 */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(-25%);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            50% {
+                transform: translateY(0);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
             }
         }
-    </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .bg-pattern {
-                background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-                background-size: 20px 20px;
-            }
-            .shadow-soft {
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            }
+        
+        .animate-bounce {
+            animation: bounce 1s infinite;
         }
     </style>
+    
+    <!-- 回退脚本 -->
+    <script>
+        // 检查并初始化tailwind
+        if (typeof tailwind === 'undefined') {
+            console.log('Tailwind CSS CDN 加载失败，使用本地样式');
+        } else {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: '#1a365d',
+                            secondary: '#f8f5f0',
+                            accent: '#e6a23c',
+                            neutral: '#f5f5f5',
+                            'neutral-dark': '#333333',
+                        },
+                        fontFamily: {
+                            sans: ['Inter', 'system-ui', 'sans-serif'],
+                        },
+                    },
+                }
+            }
+        }
+        
+        // 检查并初始化Supabase
+        if (typeof window.supabase === 'undefined') {
+            console.log('Supabase SDK CDN 加载失败，使用模拟实现');
+            window.supabase = {
+                createClient: function() {
+                    return {
+                        auth: {
+                            signInWithOtp: function() {
+                                return { error: 'Supabase SDK 未加载' };
+                            },
+                            getSession: function() {
+                                return { data: { session: null } };
+                            },
+                            getUser: function() {
+                                return { data: { user: null } };
+                            }
+                        },
+                        from: function() {
+                            return {
+                                insert: function() {
+                                    return { error: 'Supabase SDK 未加载' };
+                                },
+                                select: function() {
+                                    return { error: 'Supabase SDK 未加载' };
+                                }
+                            };
+                        }
+                    };
+                }
+            };
+        }
+        
+        // 检查并初始化html2pdf
+        if (typeof html2pdf === 'undefined') {
+            console.log('html2pdf CDN 加载失败，使用模拟实现');
+            window.html2pdf = function() {
+                return {
+                    set: function() {
+                        return this;
+                    },
+                    from: function() {
+                        return this;
+                    },
+                    save: function() {
+                        alert('PDF导出功能需要html2pdf库，请确保网络连接正常');
+                    }
+                };
+            };
+        }
+        
+        // 检查并初始化Font Awesome
+        if (typeof FontAwesome === 'undefined') {
+            console.log('Font Awesome CDN 加载失败，使用模拟图标');
+        }
+    </script>
 </head>
 <body class="bg-neutral font-sans text-neutral-dark">
     <div class="flex min-h-screen">
@@ -47,7 +588,7 @@
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 rounded-lg overflow-hidden">
-                        <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                        <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <h1 class="text-lg font-bold text-primary">LAY AI</h1>
@@ -61,18 +602,26 @@
             <!-- 会话管理 -->
             <div class="flex-1 overflow-y-auto p-4">
                 <div class="space-y-3">
-                    <button class="w-full flex items-center space-x-3 px-4 py-3 bg-secondary rounded-lg hover:bg-gray-100 transition-colors">
+                    <button id="new-conversation-btn" class="w-full flex items-center space-x-3 px-4 py-3 bg-secondary rounded-lg hover:bg-gray-100 transition-colors">
                         <i class="fa fa-plus text-gray-500"></i>
                         <span class="text-sm font-medium">发起新咨询</span>
                     </button>
-                    <button class="w-full flex items-center space-x-3 px-4 py-3 bg-primary bg-opacity-10 rounded-lg text-primary font-medium">
-                        <i class="fa fa-file-text-o"></i>
-                        <span class="text-sm">当前底稿生成</span>
-                    </button>
-                    <button class="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fa fa-folder-open text-gray-500"></i>
-                        <span class="text-sm">过往投资案</span>
-                    </button>
+                    
+                    <!-- 对话列表 -->
+                    <div class="mt-4">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">我的对话</h3>
+                        <div id="conversation-list" class="space-y-2">
+                            <!-- 对话项将通过 JavaScript 动态添加 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 公开对话 -->
+                    <div class="mt-6">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">公开对话</h3>
+                        <div id="public-conversation-list" class="space-y-2">
+                            <!-- 公开对话项将通过 JavaScript 动态添加 -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -161,10 +710,13 @@
 
 
     <script>
+        // API 基础 URL
+        const API_BASE_URL = 'http://localhost:3000';
+
         // 调用本地代理服务器API
         async function callAliAPI(prompt) {
             try {
-                const response = await fetch('/api/chat', {
+                const response = await fetch(`${API_BASE_URL}/api/chat`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -191,11 +743,130 @@
             }
         }
 
+        // 对话管理API
+        async function createConversation(user_id, title, content) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/conversations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id,
+                        title,
+                        content
+                    })
+                });
+                
+                if (!response.ok) {
+                    console.error('创建对话失败:', response.status, await response.text());
+                    return null;
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('创建对话失败:', error);
+                return null;
+            }
+        }
+
+        async function getConversations(user_id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/conversations?user_id=${user_id}`);
+                
+                if (!response.ok) {
+                    console.error('获取对话列表失败:', response.status, await response.text());
+                    return [];
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('获取对话列表失败:', error);
+                return [];
+            }
+        }
+
+        async function getPublicConversations() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/conversations?public_only=true`);
+                
+                if (!response.ok) {
+                    console.error('获取公开对话失败:', response.status, await response.text());
+                    return [];
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('获取公开对话失败:', error);
+                return [];
+            }
+        }
+
+        async function getConversationById(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/conversations/${id}`);
+                
+                if (!response.ok) {
+                    console.error('获取对话详情失败:', response.status, await response.text());
+                    return null;
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('获取对话详情失败:', error);
+                return null;
+            }
+        }
+
+        async function updateConversation(id, updates) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/conversations/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updates)
+                });
+                
+                if (!response.ok) {
+                    console.error('更新对话失败:', response.status, await response.text());
+                    return null;
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('更新对话失败:', error);
+                return null;
+            }
+        }
+
+        async function markConversationAsPublic(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/conversations/${id}/public`, {
+                    method: 'PUT'
+                });
+                
+                if (!response.ok) {
+                    console.error('标记对话为公开失败:', response.status, await response.text());
+                    return null;
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('标记对话为公开失败:', error);
+                return null;
+            }
+        }
+
         // 应用状态管理
         class LayAIBackend {
             constructor() {
                 this.state = "IDLE";
                 this.history = [];
+                this.currentConversationId = null;
+                this.userId = "user-123"; // 模拟用户ID，实际应用中应该从认证系统获取
+                // 初始化全局对话历史变量
+                window.globalChatHistory = window.globalChatHistory || [];
             }
 
             async getResponse(userInput) {
@@ -220,7 +891,7 @@
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                    <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                    <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-1">
@@ -250,7 +921,7 @@
                             <div class="flex items-start space-x-4">
                                 <div class="flex-shrink-0">
                                     <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                        <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                        <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                                     </div>
                                 </div>
                                 <div class="flex-1">
@@ -281,7 +952,7 @@
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                    <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                    <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-1">
@@ -315,7 +986,7 @@
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                    <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                    <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-1">
@@ -343,7 +1014,7 @@
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                    <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                    <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-1">
@@ -369,7 +1040,7 @@
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                             <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                             </div>
                         </div>
                         <div class="flex-1">
@@ -395,6 +1066,56 @@
 
             addMessage(role, content) {
                 this.history.push({ role, content });
+                // 更新全局对话历史变量，确保 sidecar 脚本可以访问
+                window.globalChatHistory = this.history;
+            }
+
+            async saveConversation(title) {
+                if (!this.currentConversationId) {
+                    // 创建新对话
+                    const conversation = await createConversation(this.userId, title, {
+                        messages: this.history
+                    });
+                    if (conversation) {
+                        this.currentConversationId = conversation.id;
+                    }
+                } else {
+                    // 更新现有对话
+                    await updateConversation(this.currentConversationId, {
+                        title,
+                        content: {
+                            messages: this.history
+                        }
+                    });
+                }
+            }
+
+            async loadConversation(conversationId) {
+                const conversation = await getConversationById(conversationId);
+                if (conversation) {
+                    this.currentConversationId = conversation.id;
+                    this.history = conversation.content?.messages || [];
+                    // 更新全局对话历史变量，确保 sidecar 脚本可以访问
+                    window.globalChatHistory = this.history;
+                    this.state = "ANALYSIS"; // 直接进入分析状态
+                    return conversation;
+                }
+                return null;
+            }
+
+            async shareConversation() {
+                if (this.currentConversationId) {
+                    return await markConversationAsPublic(this.currentConversationId);
+                }
+                return null;
+            }
+
+            clearConversation() {
+                this.state = "IDLE";
+                this.history = [];
+                // 更新全局对话历史变量，确保 sidecar 脚本可以访问
+                window.globalChatHistory = this.history;
+                this.currentConversationId = null;
             }
         }
 
@@ -403,6 +1124,9 @@
         const chatHistory = document.getElementById('chat-history');
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
+        const conversationList = document.getElementById('conversation-list');
+        const publicConversationList = document.getElementById('public-conversation-list');
+        const newConversationBtn = document.getElementById('new-conversation-btn');
 
         // 添加消息到界面
         function addMessageToUI(role, content) {
@@ -435,7 +1159,7 @@
                 <div id="loading-message" class="flex items-start space-x-4">
                     <div class="flex-shrink-0">
                         <div class="w-10 h-10 rounded-lg overflow-hidden">
-                            <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                            <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                         </div>
                     </div>
                     <div class="flex-1">
@@ -457,44 +1181,104 @@
             }
         }
 
-        // 初始化欢迎消息
-        async function initWelcomeMessage() {
+        // 清空聊天历史
+        function clearChatHistory() {
+            chatHistory.innerHTML = '';
+        }
+
+        // 渲染对话列表
+        function renderConversationList(conversations) {
+            conversationList.innerHTML = '';
+            
+            conversations.forEach(conversation => {
+                const isActive = conversation.id === backend.currentConversationId;
+                const conversationItem = `
+                    <button 
+                        class="w-full flex items-center justify-between px-4 py-3 ${isActive ? 'bg-primary bg-opacity-10 rounded-lg text-primary font-medium' : 'hover:bg-gray-100 rounded-lg transition-colors'}"
+                        data-id="${conversation.id}"
+                    >
+                        <div class="flex items-center space-x-3">
+                            <i class="fa fa-file-text-o"></i>
+                            <span class="text-sm">${conversation.title || '未命名对话'}</span>
+                        </div>
+                        <span class="text-xs text-gray-500">${new Date(conversation.created_at).toLocaleString()}</span>
+                    </button>
+                `;
+                conversationList.insertAdjacentHTML('beforeend', conversationItem);
+            });
+
+            // 添加对话切换事件
+            document.querySelectorAll('#conversation-list button').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const conversationId = this.getAttribute('data-id');
+                    await switchConversation(conversationId);
+                });
+            });
+        }
+
+        // 渲染公开对话列表
+        function renderPublicConversationList(conversations) {
+            publicConversationList.innerHTML = '';
+            
+            conversations.forEach(conversation => {
+                const conversationItem = `
+                    <button 
+                        class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors"
+                        data-id="${conversation.id}"
+                    >
+                        <div class="flex items-center space-x-3">
+                            <i class="fa fa-globe text-gray-500"></i>
+                            <span class="text-sm">${conversation.title || '未命名对话'}</span>
+                        </div>
+                        <span class="text-xs text-gray-500">${new Date(conversation.created_at).toLocaleString()}</span>
+                    </button>
+                `;
+                publicConversationList.insertAdjacentHTML('beforeend', conversationItem);
+            });
+
+            // 添加公开对话点击事件
+            document.querySelectorAll('#public-conversation-list button').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const conversationId = this.getAttribute('data-id');
+                    await switchConversation(conversationId);
+                });
+            });
+        }
+
+        // 切换对话
+        async function switchConversation(conversationId) {
+            showLoading();
+            
             try {
-                // 添加固定的第一句互动消息
-                const welcomeMessage = `
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-white rounded-xl p-5 shadow-soft">
-                                <p class="text-gray-700">来了？ 酒店行业进入下半场，我们只谈生存和盈利逻辑。 唯有在不确定中寻找确定性，我带你一起穿越周期。</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                addMessageToUI('assistant', welcomeMessage);
-                backend.addMessage('assistant', welcomeMessage);
+                const conversation = await backend.loadConversation(conversationId);
+                if (conversation) {
+                    clearChatHistory();
+                    
+                    // 重新渲染聊天历史
+                    conversation.content?.messages.forEach(msg => {
+                        if (msg.role === 'user') {
+                            addMessageToUI('user', msg.content);
+                        } else {
+                            addMessageToUI('assistant', msg.content);
+                        }
+                    });
+                }
             } catch (error) {
-                console.error('初始化消息失败:', error);
-                const defaultMessage = `
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-white rounded-xl p-5 shadow-soft">
-                                <p class="text-gray-700">系统初始化失败，请稍后重试。</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                addMessageToUI('assistant', defaultMessage);
+                console.error('切换对话失败:', error);
+            } finally {
+                removeLoading();
+                // 重新加载对话列表
+                loadConversations();
             }
+        }
+
+        // 加载对话列表
+        async function loadConversations() {
+            const userConversations = await getConversations(backend.userId);
+            const publicConversations = await getPublicConversations();
+            
+            renderConversationList(userConversations);
+            renderPublicConversationList(publicConversations);
         }
 
         // 处理表单提交
@@ -517,6 +1301,11 @@
                 removeLoading();
                 addMessageToUI('assistant', response);
                 backend.addMessage('assistant', response);
+                
+                // 自动保存对话
+                await backend.saveConversation('酒店投资咨询');
+                // 重新加载对话列表
+                loadConversations();
             } catch (error) {
                 console.error('获取响应失败:', error);
                 removeLoading();
@@ -533,7 +1322,7 @@
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                    <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                    <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-1">
@@ -550,7 +1339,7 @@
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-lg overflow-hidden">
-                                    <img src="/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                                    <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-1">
@@ -565,12 +1354,79 @@
             }
         });
 
+        // 处理新对话按钮
+        newConversationBtn.addEventListener('click', function() {
+            backend.clearConversation();
+            clearChatHistory();
+            loadConversations();
+        });
 
+        // 处理分享底稿按钮
+        document.querySelector('button:has(.fa-share-alt)').addEventListener('click', async function() {
+            try {
+                const result = await backend.shareConversation();
+                if (result) {
+                    alert('对话已成功分享！');
+                    loadConversations();
+                } else {
+                    alert('分享失败，请先创建对话。');
+                }
+            } catch (error) {
+                console.error('分享对话失败:', error);
+                alert('分享失败，请稍后重试。');
+            }
+        });
+
+        // 初始化欢迎消息
+        async function initWelcomeMessage() {
+            try {
+                // 添加固定的第一句互动消息
+                const welcomeMessage = `
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-lg overflow-hidden">
+                                <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white rounded-xl p-5 shadow-soft">
+                                <p class="text-gray-700">来了？ 酒店行业进入下半场，我们只谈生存和盈利逻辑。 唯有在不确定中寻找确定性，我带你一起穿越周期。</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                addMessageToUI('assistant', welcomeMessage);
+                backend.addMessage('assistant', welcomeMessage);
+            } catch (error) {
+                console.error('初始化消息失败:', error);
+                const defaultMessage = `
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-lg overflow-hidden">
+                                <img src="/public/LAY.jpg" alt="LAY AI" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white rounded-xl p-5 shadow-soft">
+                                <p class="text-gray-700">系统初始化失败，请稍后重试。</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                addMessageToUI('assistant', defaultMessage);
+            }
+        }
 
         // 初始化应用
         document.addEventListener('DOMContentLoaded', function() {
+            // 显示欢迎消息
             initWelcomeMessage();
+            // 加载对话列表
+            loadConversations();
         });
     </script>
+    
+    <!-- 加载 hotel-ai-sidecar.js 增强插件 -->
+    <script src="hotel-ai-sidecar.js"></script>
 </body>
 </html>

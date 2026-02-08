@@ -24,8 +24,8 @@
       "dest": "HATWIN.html"
     },
     {
-      "src": "/(LAY.jpg|.*\.jpg|.*\.png|.*\.gif|.*\.svg)",
-      "dest": "public/$1"
+      "src": "/LAY.jpg",
+      "dest": "public/LAY.jpg"
     },
     {
       "src": "/(.*)",
